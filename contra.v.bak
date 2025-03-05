@@ -1,0 +1,10 @@
+module contra (
+input clk,
+input rst,
+input [3:0] sw,
+input cap,
+
+output [6:0] hex0, hex1, hex2, hex3
+
+);
+
