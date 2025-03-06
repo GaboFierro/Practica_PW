@@ -28,7 +28,7 @@ module contra (
 
     always @(posedge clk) last_sw <= SW;
 
-    // Reset por SW[9]
+    // Reset SW[9]
     wire reset = SW[9];
 
     always @(posedge clk or posedge reset) begin
@@ -38,48 +38,60 @@ module contra (
             current_state <= next_state;
         end
     end
-
-    always @(*) begin
-        case (current_state)
-            IDLE:
-                if (|sw_rising_edge)
+always @(*) begin
+    case (current_state)
+        IDLE: begin
+            if (|sw_rising_edge) begin
+                if (sw_rising_edge[password[0]]) 
                     next_state = DIGIT1;
                 else
-                    next_state = IDLE;
-
-            DIGIT1:
-                if (sw_rising_edge[password[1]])
-                    next_state = DIGIT2;
-                else if (|sw_rising_edge)
-                    next_state = ERROR;
-                else
-                    next_state = DIGIT1;
-
-            DIGIT2:
-                if (sw_rising_edge[password[2]])
-                    next_state = DIGIT3;
-                else if (|sw_rising_edge)
-                    next_state = ERROR;
-                else
-                    next_state = DIGIT2;
-
-            DIGIT3:
-                if (sw_rising_edge[password[3]])
-                    next_state = COMPLETE;
-                else if (|sw_rising_edge)
-                    next_state = ERROR;
-                else
-                    next_state = DIGIT3;
-            COMPLETE:
+                    next_state = ERROR;         
+            end else begin
                 next_state = IDLE;
+            end
+        end
 
-            ERROR:
-                next_state = IDLE;
+        DIGIT1: begin
+            if (sw_rising_edge[password[1]]) 
+                next_state = DIGIT2;
+            else if (|sw_rising_edge) 
+                next_state = ERROR; 
+            else 
+                next_state = DIGIT1;
+        end
 
-            default:
-                next_state = IDLE;
-        endcase
-    end
+        DIGIT2: begin
+            if (sw_rising_edge[password[2]]) 
+                next_state = DIGIT3;
+            else if (|sw_rising_edge) 
+                next_state = ERROR;
+            else 
+                next_state = DIGIT2;
+        end
+
+        DIGIT3: begin
+            if (sw_rising_edge[password[3]]) 
+                next_state = COMPLETE;
+            else if (|sw_rising_edge) 
+                next_state = ERROR; 
+            else 
+                next_state = DIGIT3;
+        end
+
+        // Una vez completa la contraseña, vuelve a idle
+        COMPLETE:
+            next_state = IDLE;
+
+        // Después de error, regresa a idle automáticamente
+        ERROR:
+            next_state = IDLE;
+
+        // Estado de seguridad por si algo falla
+        default:
+            next_state = IDLE;
+    endcase
+end
+
 
     // Salida a displays
     always @(posedge clk) begin
