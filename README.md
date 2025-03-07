@@ -13,8 +13,5 @@ Código en Verilog
 📂 Estructura del Proyecto
 |-- top_contra.v
 |-- contra.v
-|-- one_shot.v
 |-- clk_divider.v
-|-- debouncer.v
-|-- counter_debouncer.v
 |-- README.md
